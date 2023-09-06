@@ -3,7 +3,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom';
 import { Provider } from 'react-redux';
-import store from './store'; // Import Redux store
+import store from './store'; 
+import Header from './component/Header';
 
 import MainCard from './component/MainCard';
 
@@ -13,6 +14,9 @@ import './styles/style.css';
 const root = createRoot(document.getElementById('root'));
 root.render(
   <Provider store={store}>
-    <h1><MainCard/></h1>
+    <>
+    <Header/>
+    <MainCard/>
+    </>
   </Provider>
 );
