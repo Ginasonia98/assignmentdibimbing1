@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-const Card = ({ data, onUpdate }) => {
+const Card = ({ data, onUpdate, onDelete }) => {
+  // Add onDelete prop
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState(data);
 
@@ -19,6 +20,10 @@ const Card = ({ data, onUpdate }) => {
       ...editedData,
       [name]: value,
     });
+  };
+
+  const handleDelete = () => {
+    onDelete(editedData.id); // Call the onDelete callback
   };
 
   return (
@@ -42,10 +47,16 @@ const Card = ({ data, onUpdate }) => {
             className="w-full border p-2 mb-2"
           />
           <button
-            className="bg-blue-500 text-white px-4 py-2 rounded-md"
+            className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2" // Add some spacing
             onClick={handleSave}
           >
             Save
+          </button>
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded-md" // Add styles for delete button
+            onClick={handleDelete}
+          >
+            Delete
           </button>
         </div>
       ) : (
@@ -53,15 +64,23 @@ const Card = ({ data, onUpdate }) => {
           <p className="text-gray-600">Penjelasan: {editedData.body}</p>
           <div className="mt-4 flex justify-between items-center">
             <span className="text-sm text-gray-500">
-              {editedData.archived ? 'Archived' : 'Active'}
+              {editedData.archived ? "Archived" : "Active"}
             </span>
-            <span className="text-sm text-gray-500">{editedData.formattedDate}</span>
+            <span className="text-sm text-gray-500">
+              {editedData.formattedDate}
+            </span>
           </div>
           <button
-            className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
+            className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2 mr-2"
             onClick={handleEdit}
           >
             Edit
+          </button>
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded-md mt-2" // Add styles for delete button
+            onClick={handleDelete}
+          >
+            Delete
           </button>
         </div>
       )}

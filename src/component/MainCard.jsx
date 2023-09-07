@@ -4,7 +4,7 @@ import Card from "./card";
 import { RiAddCircleLine } from "react-icons/ri";
 
 const MainCard = () => {
-  // Ubah state notes menjadi state lokal
+  // State variables
   const [notes, setNotes] = useState([]);
   const [newNotes, setNewNotes] = useState([]);
   const [addingNote, setAddingNote] = useState(false);
@@ -21,7 +21,7 @@ const MainCard = () => {
   });
 
   useEffect(() => {
-    // Ambil data catatan dari localStorage saat komponen dimuat
+    // Load notes from localStorage on component mount
     const savedNotes = JSON.parse(localStorage.getItem("notes"));
     if (savedNotes) {
       setNotes(savedNotes);
@@ -29,7 +29,7 @@ const MainCard = () => {
   }, []);
 
   useEffect(() => {
-    // Simpan perubahan data catatan ke localStorage setiap kali notes berubah
+    // Save notes to localStorage whenever 'notes' changes
     localStorage.setItem("notes", JSON.stringify(notes));
   }, [notes]);
 
@@ -38,13 +38,14 @@ const MainCard = () => {
   };
 
   const handleSaveNote = () => {
+    // Validation checks
     if (newNoteData.title.trim() === "" || newNoteData.body.trim() === "") {
-      alert("Judul dan isi catatan harus diisi.");
+      alert("Title and content must be filled.");
       return;
     }
 
     if (!/^\d+$/.test(newNoteData.id)) {
-      alert("ID harus berupa angka.");
+      alert("ID must be a number.");
       return;
     }
 
@@ -63,10 +64,10 @@ const MainCard = () => {
       formattedDate: formattedDate,
     };
 
-    // Perbarui notes dengan data yang baru
+    // Update 'notes' with the new note
     setNotes((prevNotes) => [...prevNotes, newNote]);
 
-    // Bersihkan data yang baru diinput
+    // Clear input data
     setNewNoteData({ id: "", title: "", body: "" });
     setAddingNote(false);
   };
@@ -81,8 +82,9 @@ const MainCard = () => {
   };
 
   const handleUpdateNote = (id, title, body) => {
+    // Validation checks
     if (title.trim() === "" || body.trim() === "") {
-      alert("Judul dan isi catatan harus diisi.");
+      alert("Title and content must be filled.");
       return;
     }
 
@@ -97,12 +99,20 @@ const MainCard = () => {
       return note;
     });
 
-    // Perbarui notes dengan data yang diperbarui
+    // Update 'notes' with the updated note
     setNotes(updatedNotes);
 
-    // Bersihkan state pengeditan
+    // Clear editing state
     setEditingNoteId(null);
     setEditingNoteData({ id: "", title: "", body: "" });
+  };
+
+  const handleDeleteNote = (id) => {
+    const confirmation = window.confirm("Are you sure you want to delete this note?");
+    if (confirmation) {
+      const updatedNotes = notes.filter((note) => note.id !== id);
+      setNotes(updatedNotes);
+    }
   };
 
   return (
@@ -116,7 +126,7 @@ const MainCard = () => {
             <h2 className="text-xl font-semibold mb-2">Add New Note</h2>
             <input
               type="number"
-              placeholder="Id"
+              placeholder="ID"
               className="w-full border p-2 mb-2"
               value={newNoteData.id}
               onChange={(e) =>
@@ -157,7 +167,8 @@ const MainCard = () => {
             <Card
               data={note}
               onUpdate={handleUpdateNote}
-              onEdit={handleEditNote} // Pass the callback function
+              onDelete={handleDeleteNote}
+              onEdit={handleEditNote}
             />
           </div>
         ))}
