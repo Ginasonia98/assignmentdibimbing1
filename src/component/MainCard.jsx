@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Card from "./card";
-import { RiAddCircleLine, RiEdit2Line } from "react-icons/ri";
+import { RiAddCircleLine } from "react-icons/ri";
 
 const MainCard = () => {
-  const notes = useSelector((state) => state.notes);
+  // Ubah state notes menjadi state lokal
+  const [notes, setNotes] = useState([]);
+  const [newNotes, setNewNotes] = useState([]);
   const [addingNote, setAddingNote] = useState(false);
   const [newNoteData, setNewNoteData] = useState({
     id: "",
     title: "",
     body: "",
   });
-  const [newNotes, setNewNotes] = useState([]);
   const [editingNoteId, setEditingNoteId] = useState(null);
   const [editingNoteData, setEditingNoteData] = useState({
     id: "",
@@ -20,15 +21,17 @@ const MainCard = () => {
   });
 
   useEffect(() => {
+    // Ambil data catatan dari localStorage saat komponen dimuat
     const savedNotes = JSON.parse(localStorage.getItem("notes"));
     if (savedNotes) {
-      setNewNotes(savedNotes);
+      setNotes(savedNotes);
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("notes", JSON.stringify(newNotes));
-  }, [newNotes]);
+    // Simpan perubahan data catatan ke localStorage setiap kali notes berubah
+    localStorage.setItem("notes", JSON.stringify(notes));
+  }, [notes]);
 
   const handleAddNote = () => {
     setAddingNote(!addingNote);
@@ -60,8 +63,10 @@ const MainCard = () => {
       formattedDate: formattedDate,
     };
 
-    setNewNotes((prevNotes) => [...prevNotes, newNote]);
+    // Perbarui notes dengan data yang baru
+    setNotes((prevNotes) => [...prevNotes, newNote]);
 
+    // Bersihkan data yang baru diinput
     setNewNoteData({ id: "", title: "", body: "" });
     setAddingNote(false);
   };
@@ -81,7 +86,7 @@ const MainCard = () => {
       return;
     }
 
-    const updatedNotes = newNotes.map((note) => {
+    const updatedNotes = notes.map((note) => {
       if (note.id === id) {
         return {
           ...note,
@@ -92,9 +97,10 @@ const MainCard = () => {
       return note;
     });
 
-    setNewNotes(updatedNotes);
+    // Perbarui notes dengan data yang diperbarui
+    setNotes(updatedNotes);
 
-    // Clear editing state
+    // Bersihkan state pengeditan
     setEditingNoteId(null);
     setEditingNoteData({ id: "", title: "", body: "" });
   };
@@ -153,65 +159,6 @@ const MainCard = () => {
               onUpdate={handleUpdateNote}
               onEdit={handleEditNote} // Pass the callback function
             />
-            {editingNoteId === note.id ? (
-              <div className="absolute top-0 right-0 m-2">
-                <RiEdit2Line
-                  className="text-blue-500 cursor-pointer"
-                  onClick={() =>
-                    handleUpdateNote(
-                      note.id,
-                      editingNoteData.title,
-                      editingNoteData.body
-                    )
-                  }
-                />
-                <div className="bg-white shadow-md rounded-md p-4 mt-4">
-                  <h2 className="text-xl font-semibold mb-2">Edit Note</h2>
-                  <input
-                    type="text"
-                    placeholder="Title"
-                    className="w-full border p-2 mb-2"
-                    value={editingNoteData.title}
-                    onChange={(e) =>
-                      setEditingNoteData({
-                        ...editingNoteData,
-                        title: e.target.value,
-                      })
-                    }
-                  />
-                  <textarea
-                    placeholder="Content"
-                    className="w-full border p-2 mb-2"
-                    value={editingNoteData.body}
-                    onChange={(e) =>
-                      setEditingNoteData({
-                        ...editingNoteData,
-                        body: e.target.value,
-                      })
-                    }
-                  />
-                  <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                    onClick={() =>
-                      handleUpdateNote(
-                        note.id,
-                        editingNoteData.title,
-                        editingNoteData.body
-                      )
-                    }
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="absolute top-0 right-0 m-2">
-                <RiEdit2Line
-                  className="text-blue-500 cursor-pointer"
-                  onClick={() => handleEditNote(note)}
-                />
-              </div>
-            )}
           </div>
         ))}
       </div>
@@ -220,3 +167,4 @@ const MainCard = () => {
 };
 
 export default MainCard;
+
