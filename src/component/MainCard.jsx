@@ -19,8 +19,8 @@ const MainCard = () => {
     title: "",
     body: "",
   });
-  const [searchTerm, setSearchTerm] = useState(""); // Tambahkan state untuk kata kunci pencarian
-  const [searchResults, setSearchResults] = useState([]); // Tambahkan state untuk hasil pencarian
+  const [searchTerm, setSearchTerm] = useState(""); 
+  const [searchResults, setSearchResults] = useState([]); 
 
   useEffect(() => {
     // Load notes from localStorage on component mount

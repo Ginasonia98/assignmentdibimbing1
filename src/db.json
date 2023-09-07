@@ -48,5 +48,18 @@
       "archived": false,
       "formattedDate": "Selasa, 14 April 2022"
     }
+  ],
+  "users": [
+    {
+
+    }
+  ],
+  "auth": [
+    {
+      "id": 1,
+      "name": "contohuser",
+      "email": "contohuser@example.com",
+      "password": "password123"
+    }
   ]
 }
