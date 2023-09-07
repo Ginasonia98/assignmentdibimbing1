@@ -82,6 +82,7 @@ const Card = ({ data, onUpdate, onDelete }) => {
           >
             Delete
           </button>
+          
         </div>
       )}
     </div>
