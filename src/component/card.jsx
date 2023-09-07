@@ -1,15 +1,71 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+// card.js
+import React, { useState } from 'react';
 
-const Card = ({ data }) => {
+const Card = ({ data, onUpdate }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedData, setEditedData] = useState(data);
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleSave = () => {
+    onUpdate(editedData.id, editedData.title, editedData.body);
+    setIsEditing(false);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditedData({
+      ...editedData,
+      [name]: value,
+    });
+  };
+
   return (
     <div className="bg-white shadow-md rounded-md p-4 mb-4">
-      <h2 className="text-xl font-semibold mb-2">{data.id} . {data.title}</h2>
-      <p className="text-gray-600">Penjelasan: {data.body}</p>
-      <div className="mt-4 flex justify-between items-center">
-        <span className="text-sm text-gray-500">{data.archived ? 'Archived' : 'Active'}</span>
-        <span className="text-sm text-gray-500">{data.formattedDate}</span>
-      </div>
+      <h2 className="text-xl font-semibold mb-2">
+        {editedData.id}. {editedData.title}
+      </h2>
+      {isEditing ? (
+        <div>
+          <input
+            type="text"
+            name="title"
+            value={editedData.title}
+            onChange={handleChange}
+            className="w-full border p-2 mb-2"
+          />
+          <textarea
+            name="body"
+            value={editedData.body}
+            onChange={handleChange}
+            className="w-full border p-2 mb-2"
+          />
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-md"
+            onClick={handleSave}
+          >
+            Save
+          </button>
+        </div>
+      ) : (
+        <div>
+          <p className="text-gray-600">Penjelasan: {editedData.body}</p>
+          <div className="mt-4 flex justify-between items-center">
+            <span className="text-sm text-gray-500">
+              {editedData.archived ? 'Archived' : 'Active'}
+            </span>
+            <span className="text-sm text-gray-500">{editedData.formattedDate}</span>
+          </div>
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
+            onClick={handleEdit}
+          >
+            Edit
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,40 +1,102 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Card from "./card";
-import { RiAddCircleLine } from "react-icons/ri"; // Import ikon plus
+import { RiAddCircleLine, RiEdit2Line } from "react-icons/ri";
 
 const MainCard = () => {
-  const notes = useSelector((state) => state.notes); // Mengambil data catatan dari Redux Store
-  const [addingNote, setAddingNote] = useState(false); // State untuk mengontrol tampilan form tambah catatan
-  const [newNoteData, setNewNoteData] = useState({ title: "", body: "" }); // State untuk menyimpan data tambahan
-  const [newNotes, setNewNotes] = useState([]); // State untuk menyimpan catatan yang baru ditambahkan
+  const notes = useSelector((state) => state.notes);
+  const [addingNote, setAddingNote] = useState(false);
+  const [newNoteData, setNewNoteData] = useState({
+    id: "",
+    title: "",
+    body: "",
+  });
+  const [newNotes, setNewNotes] = useState([]);
+  const [editingNoteId, setEditingNoteId] = useState(null);
+  const [editingNoteData, setEditingNoteData] = useState({
+    id: "",
+    title: "",
+    body: "",
+  });
 
-  const toggleAddNote = () => {
-    setAddingNote(!addingNote); // Toggle tampilan form tambah catatan
+  useEffect(() => {
+    const savedNotes = JSON.parse(localStorage.getItem("notes"));
+    if (savedNotes) {
+      setNewNotes(savedNotes);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("notes", JSON.stringify(newNotes));
+  }, [newNotes]);
+
+  const handleAddNote = () => {
+    setAddingNote(!addingNote);
   };
 
   const handleSaveNote = () => {
-    // Validasi apakah judul dan isi catatan tidak kosong sebelum menyimpan
     if (newNoteData.title.trim() === "" || newNoteData.body.trim() === "") {
       alert("Judul dan isi catatan harus diisi.");
       return;
     }
 
-    // Buat objek catatan baru
+    if (!/^\d+$/.test(newNoteData.id)) {
+      alert("ID harus berupa angka.");
+      return;
+    }
+
+    const formattedDate = new Date().toLocaleDateString("id-ID", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
     const newNote = {
-      id: Date.now(),
+      id: newNoteData.id,
       title: newNoteData.title,
       body: newNoteData.body,
       archived: false,
-      formattedDate: new Date().toLocaleDateString(),
+      formattedDate: formattedDate,
     };
 
-    // Tambahkan catatan baru ke dalam state newNotes
-    setNewNotes([...newNotes, newNote]);
+    setNewNotes((prevNotes) => [...prevNotes, newNote]);
 
-    // Reset data tambahan dan tutup form tambah catatan
-    setNewNoteData({ title: "", body: "" });
+    setNewNoteData({ id: "", title: "", body: "" });
     setAddingNote(false);
+  };
+
+  const handleEditNote = (note) => {
+    setEditingNoteId(note.id);
+    setEditingNoteData({
+      id: note.id,
+      title: note.title,
+      body: note.body,
+    });
+  };
+
+  const handleUpdateNote = (id, title, body) => {
+    if (title.trim() === "" || body.trim() === "") {
+      alert("Judul dan isi catatan harus diisi.");
+      return;
+    }
+
+    const updatedNotes = newNotes.map((note) => {
+      if (note.id === id) {
+        return {
+          ...note,
+          title: title,
+          body: body,
+        };
+      }
+      return note;
+    });
+
+    setNewNotes(updatedNotes);
+
+    // Clear editing state
+    setEditingNoteId(null);
+    setEditingNoteData({ id: "", title: "", body: "" });
   };
 
   return (
@@ -47,12 +109,12 @@ const MainCard = () => {
           <div className="bg-white shadow-md rounded-md p-4 mb-4">
             <h2 className="text-xl font-semibold mb-2">Add New Note</h2>
             <input
-              type="text"
+              type="number"
               placeholder="Id"
               className="w-full border p-2 mb-2"
               value={newNoteData.id}
               onChange={(e) =>
-                setNewNoteData({ ...newNoteData, title: e.target.value })
+                setNewNoteData({ ...newNoteData, id: e.target.value })
               }
             />
             <input
@@ -80,13 +142,77 @@ const MainCard = () => {
             </button>
           </div>
         ) : (
-          <div className="cursor-pointer" onClick={toggleAddNote}>
+          <div className="cursor-pointer" onClick={handleAddNote}>
             <RiAddCircleLine className="text-green-500 text-3xl" />
           </div>
         )}
-        {/* Tampilkan catatan dari state newNotes */}
         {notes.concat(newNotes).map((note) => (
-          <Card key={note.id} data={note} />
+          <div key={note.id} className="relative">
+            <Card
+              data={note}
+              onUpdate={handleUpdateNote}
+              onEdit={handleEditNote} // Pass the callback function
+            />
+            {editingNoteId === note.id ? (
+              <div className="absolute top-0 right-0 m-2">
+                <RiEdit2Line
+                  className="text-blue-500 cursor-pointer"
+                  onClick={() =>
+                    handleUpdateNote(
+                      note.id,
+                      editingNoteData.title,
+                      editingNoteData.body
+                    )
+                  }
+                />
+                <div className="bg-white shadow-md rounded-md p-4 mt-4">
+                  <h2 className="text-xl font-semibold mb-2">Edit Note</h2>
+                  <input
+                    type="text"
+                    placeholder="Title"
+                    className="w-full border p-2 mb-2"
+                    value={editingNoteData.title}
+                    onChange={(e) =>
+                      setEditingNoteData({
+                        ...editingNoteData,
+                        title: e.target.value,
+                      })
+                    }
+                  />
+                  <textarea
+                    placeholder="Content"
+                    className="w-full border p-2 mb-2"
+                    value={editingNoteData.body}
+                    onChange={(e) =>
+                      setEditingNoteData({
+                        ...editingNoteData,
+                        body: e.target.value,
+                      })
+                    }
+                  />
+                  <button
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                    onClick={() =>
+                      handleUpdateNote(
+                        note.id,
+                        editingNoteData.title,
+                        editingNoteData.body
+                      )
+                    }
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="absolute top-0 right-0 m-2">
+                <RiEdit2Line
+                  className="text-blue-500 cursor-pointer"
+                  onClick={() => handleEditNote(note)}
+                />
+              </div>
+            )}
+          </div>
         ))}
       </div>
     </div>
